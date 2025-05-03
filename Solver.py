@@ -42,6 +42,9 @@ def solver():
                     possible_words.add(candidate)
         
         word = possible_words.pop()
+        print("All possible words")
+        for item in possible_words:
+            print(item)
         print(f"Try this word {word}")
 
         while True:
