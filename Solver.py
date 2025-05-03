@@ -1,11 +1,13 @@
 def solver():
-    steps = 0
     wrong_letters = set()
     possible_words = set()
+    misplaced_letters = set()
+    misplaced_positions = []
+    right_letters = ["*","*","*","*","*"]
 
     while True:
-        first_word = input("Enter First Word: ")
-        if first_word.isalpha() and len(first_word) == 5:
+        word = input("Enter First Word: ")
+        if word.isalpha() and len(word) == 5:
             break
         else:
             print("\nPlease enter a valid word")
@@ -22,13 +24,25 @@ def solver():
         if (pattern) == "ggggg":
             print("Good job!")
             exit(0)
+
+        for i, letter in enumerate(pattern):
+            if pattern[i] == "f":
+                wrong_letters.add(word[i])
+            if pattern[i] == "g":
+                right_letters[i] = word[i]
+            if pattern[i] =="y":
+                misplaced_letters.add(word[i])
+                misplaced_positions.append((word[i], i))
         
         with open("words.txt") as file:
-            for word in file:
-                if len(word) == 5 and valid_word(word, pattern):
-                    possible_words.add(word)
+            possible_words = set()
+            for candidate in file:
+                candidate = candidate.strip().lower()
+                if len(candidate) == 5 and valid_word(candidate, pattern, wrong_letters, right_letters, misplaced_letters, misplaced_positions):
+                    possible_words.add(candidate)
         
-        print(f"Try this word {possible_words.pop()}")
+        word = possible_words.pop()
+        print(f"Try this word {word}")
 
         while True:
             pattern = input("Enter the pattern: ")
@@ -38,8 +52,22 @@ def solver():
                 print("\nPlease enter a valid pattern")
 
 
-def valid_word(word, pattern):
+def valid_word(word, pattern, wrong_letters, right_letters, misplaced_letters, misplaced_positions):
+    if set(word) & wrong_letters:
+        return False
 
+    if not misplaced_letters.issubset(set(word)):
+        return False
+    
+    for i, letter in enumerate(pattern):
+        if word[i] != right_letters[i] and right_letters[i] != "*":
+            return False
+        
+    for letter, idx in misplaced_positions:
+        if word[idx] == letter:
+            return False   
+        
+    return True
 
 
 def valid_pattern(word):
